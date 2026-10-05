@@ -33,7 +33,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:26px}
 
 <div class="card">
   <label>Alamat server API (VPS)</label>
-  <div class="api"><input id="api" value="http://43.163.117.65:18800" placeholder="http://43.163.117.65:18800"><button style="width:auto;margin:0;padding:8px 14px;font-size:12.5px" onclick="setApi()">Simpan</button></div>
+  <div class="api"><input id="api" value="http://213.163.196.178" placeholder="http://213.163.196.178"><button style="width:auto;margin:0;padding:8px 14px;font-size:12.5px" onclick="setApi()">Simpan</button></div>
 </div>
 
 <div class="card">
@@ -58,7 +58,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:26px}
 <footer>Yowes Web UI · frontend: GitHub Pages · engine: VPS<br>Untuk keperluan fiksi/kreatif/test saja.</footer>
 </div>
 <script>
-let API=localStorage.getItem('yowes_api')||'http://43.163.117.65:18800';
+let API=localStorage.getItem('yowes_api')||'http://213.163.196.178';
 let COUNTRIES=[];
 const $=id=>document.getElementById(id);
 function setApi(){API=$('api').value.trim().replace(/\/+$/,'');localStorage.setItem('yowes_api',API);init()}
