@@ -92,10 +92,8 @@ async function pickCountry(){
   showSchoolInfo();
 }
 function schoolInfoHTML(s){
-  const addr=s.address||'';
-  const city=(s.city||s.town||'');
-  const loc=[addr, city].filter(Boolean).join(', ');
-  return `<div class="schoolcard">🏫 <b>${s.name}</b>${loc?`<br><span class="k">${loc}</span>`:''}</div>`;
+  const parts=[s.address, s.city||s.town, s.province||s.state, s.postcode||s.zip].filter(Boolean);
+  return `<div class="schoolcard">🏫 <b>${s.name}</b>${parts.length?`<br><span class="k">${parts.join(', ')}</span>`:''}</div>`;
 }
 async function showSchoolInfo(){
   const code=$('country').value, name=$('school').value, box=$('schoolinfo');
