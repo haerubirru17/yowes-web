@@ -201,7 +201,7 @@ async function pickCountry(){
   showSchoolInfo();
 }
 function schoolInfoHTML(s){
-  const rows=[['Alamat',s.address],['Kota',s.city||s.town],['Provinsi',s.province||s.state],
+  const rows=[['Alamat',s.address],['Kota',s.city||s.town],['Provinsi',s.province||s.state||s.region],
     ['Kode pos',s.postcode||s.zip],['Telepon',s.phone],['NPSN',s.npsn],['Website',s.domain]].filter(r=>r[1]);
   return `<div class="schoolcard"><b>🏫 ${s.name}</b><div class="sgrid">${rows.map(r=>`<span class="k">${r[0]}</span><span>${r[1]}</span>`).join('')}</div></div>`;
 }

@@ -92,7 +92,7 @@ async function pickCountry(){
   showSchoolInfo();
 }
 function schoolInfoHTML(s){
-  const parts=[s.address, s.city||s.town, s.province||s.state, s.postcode||s.zip].filter(Boolean);
+  const parts=[s.address, s.city||s.town, s.province||s.state||s.region, s.postcode||s.zip].filter(Boolean);
   return `<div class="schoolcard">🏫 <b>${s.name}</b>${parts.length?`<br><span class="k">${parts.join(', ')}</span>`:''}</div>`;
 }
 async function showSchoolInfo(){
