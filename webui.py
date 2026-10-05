@@ -82,7 +82,10 @@ class GenReq(BaseModel):
 def api_generate(req: GenReq):
     try:
         gen = get_country(req.country)()
-        school = gen.search_school(req.school_name)
+        # exact-name match first (integration layer — engine's search_school untouched)
+        school = next((s for s in gen.schools if s["name"].lower() == req.school_name.strip().lower()), None)
+        if school is None:
+            school = gen.search_school(req.school_name)
         if school is None:
             raise HTTPException(400, f"Sekolah '{req.school_name}' tidak ditemukan.")
         types = req.document_types or gen.get_document_types()
