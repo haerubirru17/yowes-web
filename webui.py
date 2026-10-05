@@ -8,14 +8,16 @@ FastAPI + single HTML page. Endpoints:
   POST /api/generate -> renders PNGs, returns download URLs
   GET  /files/{name} -> serve generated PNG
 """
+import os
 import re
 import sys
 from pathlib import Path
 
-YOWES_DIR = Path("/home/agentuser/.hermes/cache/scratch/yowes")
+# Where the yowes engine lives (override with YOWES_DIR env var)
+YOWES_DIR = Path(os.environ.get("YOWES_DIR", "/home/agentuser/.hermes/cache/scratch/yowes"))
 sys.path.insert(0, str(YOWES_DIR))
-OUT_DIR = YOWES_DIR / "output"
-OUT_DIR.mkdir(exist_ok=True)
+OUT_DIR = Path(os.environ.get("YOWES_OUTPUT_DIR", YOWES_DIR / "output"))
+OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
