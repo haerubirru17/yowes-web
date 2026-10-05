@@ -1,115 +1,4 @@
-#!/usr/bin/env python3
-"""Yowes Web UI — simple form front-end for the Yowes document generator.
-
-FastAPI + single HTML page. Endpoints:
-  GET  /            -> form page
-  GET  /api/countries
-  GET  /api/schools?country=xx
-  POST /api/generate -> renders PNGs, returns download URLs
-  GET  /files/{name} -> serve generated PNG
-"""
-import re
-import sys
-from pathlib import Path
-
-YOWES_DIR = Path("/home/agentuser/.hermes/cache/scratch/yowes")
-sys.path.insert(0, str(YOWES_DIR))
-OUT_DIR = YOWES_DIR / "output"
-OUT_DIR.mkdir(exist_ok=True)
-
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
-import uvicorn
-from pydantic import BaseModel
-
-from countries import get_country, list_countries
-
-app = FastAPI(title="Yowes Web UI")
-
-# Allow the GitHub Pages front-end to call this API from the browser
-from fastapi.middleware.cors import CORSMiddleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["https://haerubirru17.github.io"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-@app.get("/api/countries")
-def api_countries():
-    out = []
-    for code in list_countries():
-        gen = get_country(code)()
-        out.append({
-            "code": code,
-            "name": gen.get_country_name(),
-            "document_types": gen.get_document_types(),
-        })
-    return out
-
-
-@app.get("/api/schools")
-def api_schools(country: str):
-    try:
-        gen = get_country(country)()
-    except Exception as e:
-        raise HTTPException(400, str(e))
-    return gen.schools
-
-
-class GenReq(BaseModel):
-    country: str
-    first_name: str
-    last_name: str
-    school_name: str
-    position: str
-    date_of_birth: str
-    gender: str = "Random"
-    document_types: list[str] | None = None
-
-
-@app.post("/api/generate")
-def api_generate(req: GenReq):
-    try:
-        gen = get_country(req.country)()
-        school = gen.search_school(req.school_name)
-        if school is None:
-            raise HTTPException(400, f"Sekolah '{req.school_name}' tidak ditemukan.")
-        types = req.document_types or gen.get_document_types()
-        gen._current_person_id = f"{req.first_name}_{req.last_name}".lower()
-        gen._current_gender = req.gender
-        from countries.utils import clear_photo_cache
-        clear_photo_cache()
-        files = []
-        from datetime import datetime
-        stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        for dtype in types:
-            data = gen.generate_document(
-                doc_type=dtype, first=req.first_name, last=req.last_name,
-                school=school, position=req.position, dob=req.date_of_birth)
-            fname = f"{req.country}_{dtype}_{req.first_name.lower()}_{req.last_name.lower()}_{stamp}.png"
-            (OUT_DIR / fname).write_bytes(data)
-            files.append(fname)
-        return JSONResponse({"ok": True, "files": files,
-                             "school": school["name"]})
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(500, str(e))
-
-
-@app.get("/files/{name}")
-def api_file(name: str):
-    if not re.fullmatch(r"[A-Za-z0-9._-]+", name):
-        raise HTTPException(400, "bad name")
-    path = OUT_DIR / name
-    if not path.exists():
-        raise HTTPException(404, "not found")
-    return FileResponse(path, media_type="image/png", filename=name)
-
-
-PAGE = r"""<!doctype html>
+<!doctype html>
 <html lang="id"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Yowes Doc Generator</title>
@@ -134,11 +23,18 @@ button:disabled{opacity:.5;cursor:wait}
 .msg.err{background:rgba(248,113,113,.12);color:var(--bad);display:block}
 .msg.ok{background:rgba(52,211,153,.12);color:var(--ok);display:block}
 .results{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
-.results img{width:100%;border:1px solid var(--line);border-radius:8px}
+.results img{width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
 .dl{display:block;text-align:center;font-size:12.5px;color:var(--acc);margin-top:5px;text-decoration:none}
 footer{color:var(--muted);font-size:12px;text-align:center;margin-top:26px}
+.api{display:flex;gap:8px;align-items:center;margin-bottom:4px}
+.api input{flex:1;font-family:ui-monospace,monospace;font-size:12.5px}
 </style></head><body><div class="wrap">
 <h1><span class="dot"></span>Yowes Doc Generator <small style="color:var(--muted);font-size:12px">· web UI</small></h1>
+
+<div class="card">
+  <label>Alamat server API (VPS)</label>
+  <div class="api"><input id="api" value="http://43.163.117.65:18800" placeholder="http://43.163.117.65:18800"><button style="width:auto;margin:0;padding:8px 14px;font-size:12.5px" onclick="setApi()">Simpan</button></div>
+</div>
 
 <div class="card">
   <label>Negara</label><select id="country"><option value="">memuat…</option></select>
@@ -149,7 +45,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:26px}
     <div><label>Nama belakang</label><input id="last" placeholder="Santoso"></div>
   </div>
   <div class="row">
-    <div><label>Posisi / Jabatan</label><input id="pos" placeholder="Math Teacher"></div>
+    <div><label>Posisi / Jabatan</label><input id="pos" placeholder="Guru Matematika"></div>
     <div><label>Tanggal lahir (tampil di kartu)</label><input id="dob" placeholder="12 May 1990"></div>
   </div>
   <label>Gender foto</label>
@@ -159,28 +55,33 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:26px}
 </div>
 
 <div class="results" id="results"></div>
-<footer>Yowes Web UI · hasil di server: <code>~/.hermes/cache/scratch/yowes/output</code><br>Untuk keperluan fiksi/kreatif/test saja.</footer>
+<footer>Yowes Web UI · frontend: GitHub Pages · engine: VPS<br>Untuk keperluan fiksi/kreatif/test saja.</footer>
 </div>
 <script>
-let COUNTRIES=[], DOCTYPES=[], selected=new Set();
+let API=localStorage.getItem('yowes_api')||'http://43.163.117.65:18800';
+let COUNTRIES=[];
 const $=id=>document.getElementById(id);
+function setApi(){API=$('api').value.trim().replace(/\/+$/,'');localStorage.setItem('yowes_api',API);init()}
 async function j(url,opt){const r=await fetch(url,opt);if(!r.ok){let e;try{e=(await r.json()).detail}catch(_){e=r.statusText}throw new Error(e)}return r.json()}
 async function init(){
-  COUNTRIES=await j('/api/countries');
-  $('country').innerHTML='<option value="">— pilih negara —</option>'+COUNTRIES.map(c=>`<option value="${c.code}">${c.name}</option>`).join('');
+  $('api').value=API;
+  $('country').innerHTML='<option value="">memuat…</option>';
+  try{
+    COUNTRIES=await j(API+'/api/countries');
+    $('country').innerHTML='<option value="">— pilih negara —</option>'+COUNTRIES.map(c=>`<option value="${c.code}">${c.name}</option>`).join('');
+  }catch(e){$('country').innerHTML='<option value="">❌ server tak terjangkau</option>'}
 }
 async function pickCountry(){
-  const code=$('country').value; selected.clear(); $('doctypes').innerHTML=''; $('results').innerHTML='';
+  const code=$('country').value; $('results').innerHTML='';
   if(!code){$('school').innerHTML='<option value="">pilih negara dulu…</option>';return}
   const c=COUNTRIES.find(x=>x.code===code);
-  DOCTYPES=c.document_types;
-  $('doctypes').innerHTML=DOCTYPES.map(d=>`<span class="chip on" data-d="${d}">${d.replaceAll('_',' ')}</span>`).join('')+`<span class="chip" data-d="__all__">pilih semua</span>`;
+  $('doctypes').innerHTML=c.document_types.map(d=>`<span class="chip on" data-d="${d}">${d.replaceAll('_',' ')}</span>`).join('')+`<span class="chip" data-d="__all__">pilih semua</span>`;
   document.querySelectorAll('#doctypes .chip').forEach(ch=>ch.onclick=()=>{
     if(ch.dataset.d==='__all__'){const all=[...document.querySelectorAll('#doctypes .chip')].filter(x=>x.dataset.d!=='__all__');
       const on=all[0].classList.contains('on'); all.forEach(x=>x.classList.toggle('on',!on));}
     else ch.classList.toggle('on');
   });
-  const schools=await j('/api/schools?country='+code);
+  const schools=await j(API+'/api/schools?country='+code);
   $('school').innerHTML=schools.map(s=>`<option value="${s.name}">${s.name} — ${s.town||''}</option>`).join('');
 }
 $('country').onchange=pickCountry;
@@ -190,23 +91,14 @@ $('go').onclick=async()=>{
   if(!$('country').value||!$('school').value||!$('first').value||!$('last').value||!$('pos').value){msg.className='msg err';msg.textContent='Lengkapi dulu: negara, sekolah, nama, posisi.';return}
   btn.disabled=true;msg.className='msg';msg.style.display='none';$('results').innerHTML='';
   try{
-    const res=await j('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    const res=await j(API+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       country:$('country').value,first_name:$('first').value.trim(),last_name:$('last').value.trim(),
       school_name:$('school').value,position:$('pos').value.trim(),date_of_birth:$('dob').value.trim()||'—',
       gender:$('gender').value,document_types:types.length?types:null})});
     msg.className='msg ok';msg.textContent=`✅ ${res.count} dokumen dibuat · sekolah: ${res.school}`;
-    $('results').innerHTML=res.files.map(f=>`<div><img src="/files/${f}" loading="lazy"><a class="dl" href="/files/${f}" download>⬇ download ${f.split('_')[1].replaceAll('_',' ')}</a></div>`).join('');
+    $('results').innerHTML=res.files.map(f=>`<div><img src="${API}/files/${f}" loading="lazy"><a class="dl" href="${API}/files/${f}" download>⬇ download ${f.split('_')[1].replaceAll('_',' ')}</a></div>`).join('');
   }catch(e){msg.className='msg err';msg.textContent='❌ '+e.message}
   btn.disabled=false;
 };
 init();
-</script></body></html>"""
-
-
-@app.get("/", response_class=HTMLResponse)
-def index():
-    return PAGE
-
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=18800, log_level="warning")
+</script></body></html>
