@@ -145,7 +145,7 @@ $('go').onclick=async()=>{
       country:$('country').value,first_name:$('first').value.trim(),last_name:$('last').value.trim(),
       school_name:$('school').value,position:$('pos').value.trim(),date_of_birth:$('dob').value.trim()||'—',
       gender:$('gender').value,document_types:types.length?types:null})});
-    msg.className='msg ok';msg.textContent=`✅ ${res.count} dokumen dibuat · sekolah: ${res.school}`;
+    msg.className='msg ok';msg.textContent=`✅ ${res.files.length} dokumen dibuat · sekolah: ${res.school}`;
     $('results').innerHTML=res.files.map(f=>`<div><img src="${API}/files/${f}" loading="lazy"><a class="dl" href="${API}/files/${f}" download>⬇ download ${f.split('_')[1].replaceAll('_',' ')}</a></div>`).join('');
   }catch(e){msg.className='msg err';msg.textContent='❌ '+e.message}
   btn.disabled=false;
