@@ -86,8 +86,8 @@ def api_resolve(req: ResolveReq):
     scored.sort(key=lambda t: (-t[0], t[1]))
     best_score, best_code, best = scored[0]
     if best_score == 0:
-        # no data anywhere; fall back to US but tell the client
-        best_code, best = scored[0][1], scored[0][2]
+        # no match anywhere: pick a random country instead of always the first
+        best_score, best_code, best = random.choice(scored)
 
     rnd = random.Random(f"{req.first_name}|{req.last_name}".lower())
     position = rnd.choice(best["positions"]) if best["positions"] else "Teacher"
