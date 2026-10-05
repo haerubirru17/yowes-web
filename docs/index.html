@@ -92,9 +92,10 @@ async function pickCountry(){
   showSchoolInfo();
 }
 function schoolInfoHTML(s){
-  const rows=[['Alamat',s.address],['Kota',s.city||s.town],['Provinsi',s.province||s.state],
-    ['Kode pos',s.postcode||s.zip],['Telepon',s.phone],['NPSN',s.npsn],['Website',s.domain]].filter(r=>r[1]);
-  return `<div class="schoolcard"><b>🏫 ${s.name}</b><div class="sgrid">${rows.map(r=>`<span class="k">${r[0]}</span><span>${r[1]}</span>`).join('')}</div></div>`;
+  const addr=s.address||'';
+  const city=(s.city||s.town||'');
+  const loc=[addr, city].filter(Boolean).join(', ');
+  return `<div class="schoolcard">🏫 <b>${s.name}</b>${loc?`<br><span class="k">${loc}</span>`:''}</div>`;
 }
 async function showSchoolInfo(){
   const code=$('country').value, name=$('school').value, box=$('schoolinfo');
@@ -129,9 +130,8 @@ $('magic').onclick=async()=>{
       school_name:res.profile.school_name,position:res.profile.position,
       date_of_birth:res.profile.date_of_birth,gender:res.profile.gender,
       document_types:res.document_types})});
-    msg.className='msg ok';msg.textContent=`✅ ${gres.count} dokumen dibuat · ${res.country_name} · ${gres.school}`;
-    const card=gres.school_full?schoolInfoHTML(gres.school_full):'';
-    $('results').innerHTML=card+gres.files.map(f=>`<div><img src="${API}/files/${f}" loading="lazy"><a class="dl" href="${API}/files/${f}" download>⬇ download ${f.split('_')[1].replaceAll('_',' ')}</a></div>`).join('');
+    msg.className='msg ok';msg.textContent=`✅ ${gres.files.length} dokumen dibuat · ${res.country_name} · ${gres.school}`;
+    $('results').innerHTML=gres.files.map(f=>`<div><img src="${API}/files/${f}" loading="lazy"><a class="dl" href="${API}/files/${f}" download>⬇ download ${f.split('_')[1].replaceAll('_',' ')}</a></div>`).join('');
   }catch(e){msg.className='msg err';msg.textContent='❌ '+e.message}
   btn.disabled=false;
 };
