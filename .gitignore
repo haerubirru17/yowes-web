@@ -1,0 +1,4 @@
+output/
+*.png
+__pycache__/
+.env
