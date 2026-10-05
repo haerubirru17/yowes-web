@@ -213,4 +213,10 @@ def index():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "18800"))
-    uvicorn.run(app, host="0.0.0.0", port=port, log_level="warning")
+    ssl_cert = os.environ.get("SSL_CERT")
+    ssl_key = os.environ.get("SSL_KEY")
+    if ssl_cert and ssl_key:
+        uvicorn.run(app, host="0.0.0.0", port=port, log_level="warning",
+                    ssl_certfile=ssl_cert, ssl_keyfile=ssl_key)
+    else:
+        uvicorn.run(app, host="0.0.0.0", port=port, log_level="warning")
