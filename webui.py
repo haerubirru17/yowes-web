@@ -33,6 +33,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://haerubirru17.github.io"],
+    allow_origin_regex=r"https://.*",
     allow_methods=["*"],
     allow_headers=["*"],
 )
