@@ -28,6 +28,9 @@ from countries import get_country, list_countries
 
 app = FastAPI(title="Yowes Web UI")
 
+from meta_api import router as meta_router
+app.include_router(meta_router)
+
 # Allow the GitHub Pages front-end to call this API from the browser
 from fastapi.middleware.cors import CORSMiddleware
 app.add_middleware(

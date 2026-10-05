@@ -46,11 +46,12 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:26px}
   </div>
   <div class="row">
     <div><label>Posisi / Jabatan</label><input id="pos" placeholder="Guru Matematika"></div>
-    <div><label>Tanggal lahir (tampil di kartu)</label><input id="dob" placeholder="12 May 1990"></div>
+    <div><label>Tanggal lahir (tampil di kartu) <a href="#" id="dobrand" style="color:var(--acc);font-size:11px;float:right">🎲 random</a></label><input id="dob" placeholder="12 May 1990"></div>
   </div>
   <label>Gender foto</label>
   <select id="gender"><option>Random</option><option>Male</option><option>Female</option></select>
   <button id="go">⚡ Generate Dokumen</button>
+  <button id="magic" style="background:linear-gradient(135deg,#a78bfa,#7c3aed);margin-top:10px">🪄 Auto Magic — kenali nama & generate otomatis</button>
   <div class="msg" id="msg"></div>
 </div>
 
@@ -85,6 +86,33 @@ async function pickCountry(){
   $('school').innerHTML=schools.map(s=>`<option value="${s.name}">${s.name} — ${s.town||''}</option>`).join('');
 }
 $('country').onchange=pickCountry;
+$('dobrand').onclick=e=>{e.preventDefault();
+  const m=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  $('dob').value=(1+Math.floor(Math.random()*28))+' '+m[Math.floor(Math.random()*12)]+' '+(1970+Math.floor(Math.random()*31));
+};
+$('magic').onclick=async()=>{
+  const btn=$('magic'),msg=$('msg');
+  if(!$('first').value.trim()||!$('last').value.trim()){msg.className='msg err';msg.textContent='Isi nama depan & belakang dulu.';return}
+  btn.disabled=true;msg.className='msg ok';msg.textContent='🪄 Menganalisis nama…';$('results').innerHTML='';
+  try{
+    const res=await j(API+'/api/resolve',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({first_name:$('first').value.trim(),last_name:$('last').value.trim(),gender:'Random'})});
+    $('country').value=res.country; await pickCountry();
+    $('pos').value=res.profile.position; $('dob').value=res.profile.date_of_birth;
+    $('gender').value=res.profile.gender; $('school').value=res.profile.school_name;
+    const p=res.matched?`cocok ${res.country_name} (skor ${res.match_score})`:`tidak ada yang cocok — fallback: ${res.country_name}`;
+    msg.textContent=`🪄 ${p} — generate: ${res.profile.position} @ ${res.profile.school_name} …`;
+    await new Promise(r=>setTimeout(r,600));
+    const gres=await j(API+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      country:res.country,first_name:$('first').value.trim(),last_name:$('last').value.trim(),
+      school_name:res.profile.school_name,position:res.profile.position,
+      date_of_birth:res.profile.date_of_birth,gender:res.profile.gender,
+      document_types:res.document_types})});
+    msg.className='msg ok';msg.textContent=`✅ ${gres.count} dokumen dibuat · ${res.country_name} · ${gres.school}`;
+    $('results').innerHTML=gres.files.map(f=>`<div><img src="${API}/files/${f}" loading="lazy"><a class="dl" href="${API}/files/${f}" download>⬇ download ${f.split('_')[1].replaceAll('_',' ')}</a></div>`).join('');
+  }catch(e){msg.className='msg err';msg.textContent='❌ '+e.message}
+  btn.disabled=false;
+};
 $('go').onclick=async()=>{
   const btn=$('go'),msg=$('msg');
   const types=[...document.querySelectorAll('#doctypes .chip.on')].map(x=>x.dataset.d).filter(d=>d!=='__all__');
