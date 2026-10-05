@@ -122,6 +122,7 @@ $('magic').onclick=async()=>{
     $('country').value=res.country; await pickCountry();
     $('pos').value=res.profile.position; $('dob').value=res.profile.date_of_birth;
     $('gender').value=res.profile.gender; $('school').value=res.profile.school_name;
+    await showSchoolInfo();
     const p=res.matched?`cocok ${res.country_name} (skor ${res.match_score})`:`tidak ada yang cocok — fallback: ${res.country_name}`;
     msg.textContent=`🪄 ${p} — generate: ${res.profile.position} @ ${res.profile.school_name} …`;
     await new Promise(r=>setTimeout(r,600));
