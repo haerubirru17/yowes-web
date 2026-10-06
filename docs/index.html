@@ -2,42 +2,86 @@
 <html lang="id"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Yowes Doc Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0a0e17;--panel:#121a2b;--line:#20293d;--text:#e7eaf3;--muted:#8590a8;--acc:#4f8cff;--ok:#34d399;--bad:#f87171}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 system-ui,sans-serif;min-height:100vh;
-background-image:radial-gradient(900px 500px at 15% -10%,#152140 0%,transparent 55%)}
-.wrap{max-width:760px;margin:0 auto;padding:26px 18px 60px}
-h1{font-size:20px;display:flex;align-items:center;gap:10px}
-.dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,#4f8cff,#a78bfa);box-shadow:0 0 12px rgba(79,140,255,.8)}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0}
-label{display:block;font-size:12.5px;color:var(--muted);margin:10px 0 4px}
-input,select{width:100%;background:#0e1421;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:9px 11px;font-size:14px}
-input:focus,select:focus{outline:none;border-color:var(--acc)}
-.row{display:flex;gap:12px}.row>div{flex:1}
-button{background:linear-gradient(135deg,#4f8cff,#2563eb);color:#fff;border:0;border-radius:9px;padding:11px 20px;font-size:14.5px;font-weight:600;cursor:pointer;width:100%;margin-top:16px}
-button:disabled{opacity:.5;cursor:wait}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
-.chip{border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:12.5px;color:var(--muted);cursor:pointer;user-select:none}
-.chip.on{background:rgba(79,140,255,.15);border-color:var(--acc);color:var(--text)}
-.msg{margin-top:12px;font-size:13px;border-radius:8px;padding:9px 12px;display:none}
-.msg.err{background:rgba(248,113,113,.12);color:var(--bad);display:block}
-.msg.ok{background:rgba(52,211,153,.12);color:var(--ok);display:block}
-.results{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
-.results img{width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
-.dl{display:block;text-align:center;font-size:12.5px;color:var(--acc);margin-top:5px;text-decoration:none}
-.schoolcard{background:#0e1421;border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:8px;padding:11px 13px;margin-top:10px;font-size:13px;grid-column:1/-1}
-.schoolcard b{color:var(--text)}
-.sgrid{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin-top:7px;font-size:12.5px}
-.sgrid .k{color:var(--muted)}
-footer{color:var(--muted);font-size:12px;text-align:center;margin-top:26px}
-.api{display:flex;gap:8px;align-items:center;margin-bottom:4px}
-.api input{flex:1;font-family:ui-monospace,monospace;font-size:12.5px}
+:root{
+  --primary:#4F46E5; --secondary:#818CF8; --accent:#EA580C;
+  --bg:#EEF2FF; --card:#FFFFFF; --fg:#1E1B4B; --muted:#475569;
+  --border:#C7D2FE; --ok:#059669; --bad:#DC2626;
+  --r-lg:24px; --r-md:18px; --r-sm:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font-family:'Baloo 2',cursive,sans-serif;font-size:15px;line-height:1.55;min-height:100vh;
+  background-image:
+    radial-gradient(320px 320px at 8% 4%, rgba(129,140,248,.25) 0%, transparent 70%),
+    radial-gradient(280px 280px at 92% 12%, rgba(234,88,12,.14) 0%, transparent 70%),
+    radial-gradient(300px 300px at 50% 100%, rgba(79,70,229,.12) 0%, transparent 70%)}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 64px}
+h1{font-size:26px;font-weight:800;display:flex;align-items:center;gap:12px;margin:0 0 6px}
+h1 small{font-size:13px;font-weight:600;color:var(--muted)}
+.dot{width:16px;height:16px;border-radius:50%;flex:none;
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  box-shadow:inset -2px -2px 5px rgba(0,0,0,.25), 3px 3px 8px rgba(79,70,229,.35)}
+.sub{color:var(--muted);font-size:13.5px;font-weight:600;margin:0 0 18px}
+.card{background:var(--card);border:3px solid var(--border);border-radius:var(--r-lg);
+  padding:20px;margin:16px 0;
+  box-shadow:inset -2px -2px 8px rgba(199,210,254,.35), 6px 6px 14px rgba(79,70,229,.12)}
+label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:12px 0 5px;letter-spacing:.2px}
+input,select{width:100%;background:#F8FAFF;border:3px solid var(--border);border-radius:var(--r-sm);
+  color:var(--fg);padding:11px 13px;font:inherit;font-weight:600;
+  box-shadow:inset 2px 2px 5px rgba(199,210,254,.4)}
+input:focus,select:focus{outline:none;border-color:var(--primary);
+  box-shadow:inset 2px 2px 5px rgba(199,210,254,.4), 0 0 0 4px rgba(79,70,229,.15)}
+.row{display:flex;gap:14px}.row>div{flex:1;min-width:0}
+button{font:inherit;font-weight:800;color:#fff;border:3px solid rgba(0,0,0,.08);
+  border-radius:var(--r-md);padding:13px 22px;font-size:15.5px;cursor:pointer;width:100%;margin-top:16px;
+  background:var(--primary);
+  box-shadow:inset -2px -3px 0 rgba(0,0,0,.18), inset 2px 3px 0 rgba(255,255,255,.25), 5px 6px 0 #A5B4FC;
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease-out}
+button:hover{transform:translateY(-2px)}
+button:active{transform:translateY(2px);
+  box-shadow:inset -2px -3px 0 rgba(0,0,0,.18), inset 2px 3px 0 rgba(255,255,255,.25), 2px 2px 0 #A5B4FC}
+button:disabled{opacity:.55;cursor:wait;transform:none}
+#go{background:var(--primary)}
+#magic{background:var(--accent);box-shadow:inset -2px -3px 0 rgba(0,0,0,.18), inset 2px 3px 0 rgba(255,255,255,.25), 5px 6px 0 #FDBA74}
+#magic:active{box-shadow:inset -2px -3px 0 rgba(0,0,0,.18), inset 2px 3px 0 rgba(255,255,255,.25), 2px 2px 0 #FDBA74}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.chip{border:3px solid var(--border);border-radius:var(--r-sm);padding:7px 14px;font-size:13px;
+  font-weight:700;color:var(--muted);cursor:pointer;user-select:none;background:#F8FAFF;
+  box-shadow:3px 3px 0 rgba(199,210,254,.6);transition:all .2s cubic-bezier(.34,1.56,.64,1)}
+.chip:hover{transform:translateY(-2px)}
+.chip.on{background:var(--secondary);border-color:var(--primary);color:#fff;
+  box-shadow:inset -2px -2px 4px rgba(0,0,0,.15), 3px 3px 0 var(--primary)}
+.msg{margin-top:14px;font-size:14px;font-weight:700;border:3px solid;border-radius:var(--r-md);padding:11px 14px;display:none}
+.msg.err{background:#FEF2F2;border-color:#FECACA;color:var(--bad);display:block}
+.msg.ok{background:#ECFDF5;border-color:#A7F3D0;color:var(--ok);display:block}
+.results{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+.results>div{background:var(--card);border:3px solid var(--border);border-radius:var(--r-md);padding:10px;
+  box-shadow:inset -2px -2px 8px rgba(199,210,254,.3), 5px 5px 0 rgba(165,180,252,.5)}
+.results img{width:100%;border-radius:10px;background:#fff}
+.dl{display:block;text-align:center;font-size:13px;font-weight:700;color:var(--primary);margin-top:7px;text-decoration:none}
+.dl:hover{text-decoration:underline}
+.schoolcard{background:#FFF7ED;border:3px solid #FED7AA;border-radius:var(--r-md);
+  padding:12px 15px;margin-top:12px;font-size:14px;grid-column:1/-1;
+  box-shadow:inset -2px -2px 6px rgba(253,186,116,.25), 4px 4px 0 rgba(253,186,116,.5)}
+.schoolcard b{color:#9A3412;font-size:15px}
+.schoolcard .k{color:#7C2D12;font-weight:600}
+footer{color:var(--muted);font-size:12.5px;font-weight:600;text-align:center;margin-top:28px}
+.api{display:flex;gap:10px;align-items:stretch;margin-bottom:4px}
+.api input{flex:1;font-size:13px}
+.api button{width:auto;margin:0;padding:10px 16px;font-size:13px}
+@media(max-width:560px){.results{grid-template-columns:1fr}.row{flex-direction:column;gap:0}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head><body><div class="wrap">
-<h1><span class="dot"></span>Yowes Doc Generator <small style="color:var(--muted);font-size:12px">· web UI</small></h1>
+<h1><span class="dot"></span>Yowes Doc Generator <small>· web UI</small></h1>
+<p class="sub">Generator dokumen edukasi — pilih negara, sekolah, isi profil, jadi.</p>
 
 <div class="card">
   <label>Alamat server API (VPS)</label>
-  <div class="api"><input id="api" value="https://213.163.196.178.sslip.io" placeholder="https://213.163.196.178.sslip.io"><button style="width:auto;margin:0;padding:8px 14px;font-size:12.5px" onclick="setApi()">Simpan</button></div>
+  <div class="api"><input id="api" value="https://213.163.196.178.sslip.io" placeholder="https://213.163.196.178.sslip.io"><button onclick="setApi()">Simpan</button></div>
 </div>
 
 <div class="card">
@@ -51,12 +95,12 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:26px}
   </div>
   <div class="row">
     <div><label>Posisi / Jabatan</label><input id="pos" placeholder="Guru Matematika"></div>
-    <div><label>Tanggal lahir (tampil di kartu) <a href="#" id="dobrand" style="color:var(--acc);font-size:11px;float:right">🎲 random</a></label><input id="dob" placeholder="12 May 1990"></div>
+    <div><label>Tanggal lahir (tampil di kartu) <a href="#" id="dobrand" style="color:var(--accent);font-weight:700">🎲 random</a></label><input id="dob" placeholder="12 May 1990"></div>
   </div>
   <label>Gender foto</label>
   <select id="gender"><option>Random</option><option>Male</option><option>Female</option></select>
   <button id="go">⚡ Generate Dokumen</button>
-  <button id="magic" style="background:linear-gradient(135deg,#a78bfa,#7c3aed);margin-top:10px">🪄 Auto Magic — kenali nama & generate otomatis</button>
+  <button id="magic">🪄 Auto Magic — kenali nama & generate otomatis</button>
   <div class="msg" id="msg"></div>
 </div>
 
