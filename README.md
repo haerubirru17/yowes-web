@@ -43,6 +43,18 @@ Browser → GitHub Pages (docs/index.html, statis, HTTPS)
 
 ---
 
+## Quick install (VPS baru / migrasi)
+
+```bash
+git clone https://github.com/haerubirru17/yowes-web.git && cd yowes-web && sudo bash install.sh
+```
+
+Skrip menjalankan seluruh langkah 1-7 di bawah secara otomatis (dependensi, clone yowes+yowes-web, venv, TLS certbot, systemd, health check, tes generate end-to-end). Domain opsional — default `<IP>.sslip.io`. Hanya ditanya sekali: pakai HTTPS? Sudah diuji end-to-end; idempotent (aman dijalankan ulang, mis. setelah `git pull`).
+
+Detail manual & penjelasan tiap langkah: [Instalasi Backend di VPS](#instalasi-backend-di-vps).
+
+---
+
 ## Instalasi Backend di VPS
 
 Semua perintah sebagai root di Ubuntu/Debian. Ganti `NAMA_DOMAIN` dengan `<IP>.sslip.io` (gratis & otomatis) atau domain sendiri.
@@ -155,6 +167,8 @@ chmod +x /etc/letsencrypt/renewal-hooks/deploy/yowes.sh
 ---
 
 ## Migrasi ke VPS baru (checklist)
+
+> **Cara tercepat:** jalankan `sudo bash install.sh` di VPS baru (lihat [Quick install](#quick-install-vps-baru--migrasi)) — checklist manual di bawah untuk yang ingin tahu detailnya.
 
 1. [ ] Provision VPS baru, install dependensi (langkah 1)
 2. [ ] Clone `yowes` + `yowes-web`, buat venv (langkah 2-3)
